@@ -1,0 +1,11 @@
+{% extends "usuarios/base.html" %}
+{% block titulo %}Editar perfil{% endblock %}
+{% block conteudo %}
+    <h1>Editar perfil</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Salvar</button>
+    </form>
+    <p><a href="{% url 'alterar_senha' %}">Alterar senha</a></p>
+{% endblock %}

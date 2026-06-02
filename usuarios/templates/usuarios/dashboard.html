@@ -1,0 +1,17 @@
+{% extends "usuarios/base.html" %}
+{% block titulo %}Dashboard{% endblock %}
+{% block conteudo %}
+    <h1>Dashboard</h1>
+    {% if user.foto_perfil %}
+        <img src="{{ user.foto_perfil.url }}" alt="foto de perfil" width="120">
+    {% endif %}
+    <p>Nome completo: {{ user.nome_completo }}</p>
+    <p>Username: {{ user.username }}</p>
+    <p>Email: {{ user.email }}</p>
+    <p>Descrição: {{ user.descricao }}</p>
+    <p>Membro desde: {{ user.date_joined }}</p>
+    <ul>
+        <li><a href="{% url 'editar_perfil' %}">Editar perfil</a></li>
+        <li><a href="{% url 'alterar_senha' %}">Alterar senha</a></li>
+    </ul>
+{% endblock %}

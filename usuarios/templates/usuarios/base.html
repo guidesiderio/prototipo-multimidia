@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block titulo %}Aplicação Multimídia{% endblock %}</title>
+</head>
+<body>
+    <header>
+        {% if user.is_authenticated %}
+            <span>Olá, {{ user.username }}</span>
+            <a href="{% url 'dashboard' %}">Dashboard</a>
+            <a href="{% url 'editar_perfil' %}">Editar perfil</a>
+            <form action="{% url 'logout' %}" method="post" style="display:inline">
+                {% csrf_token %}
+                <button type="submit">Sair</button>
+            </form>
+        {% endif %}
+    </header>
+    <main>
+        {% block conteudo %}{% endblock %}
+    </main>
+</body>
+</html>
