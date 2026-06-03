@@ -1,44 +1,33 @@
-# Fase 4: Deploy da aplicação na EC2 (Ubuntu 24.04) — registro do que foi executado
+# Fase 4: Deploy da aplicação na EC2 (Ubuntu 24.04)
 
-> Este documento registra os passos **realmente executados** no deploy, que
-> divergem em alguns pontos do runbook original. Principais diferenças:
->
-> - Os comandos da EC2 foram rodados de forma **não interativa**, um a um, via
->   `ssh -i chave ubuntu@IP "comando"` (não houve sessão de login interativa).
-> - A instalação de pacotes usou `apt-get` com `DEBIAN_FRONTEND=noninteractive`.
-> - A **chave secreta de produção NÃO foi gerada na instância**: foi reaproveitada
->   a chave que já estava no arquivo `.env` local do projeto.
-> - O **superusuário não foi `admin`**: foi criado a partir das variáveis
->   `DJANGO_SUPERUSER_*` do `.env` (usuário `guilhermedesiderio`).
-> - Os valores reais (URL do repo, IP, chave, hosts, credenciais) vieram do
->   arquivo `.env` local, que serviu de fonte única de verdade do deploy.
->
-> Cada comando indica onde roda: **LOCAL** (máquina de desenvolvimento) ou
-> **EC2** (dentro da instância, via SSH não interativo).
+> Runbook do deploy executado. Cada comando indica onde roda: **LOCAL** (máquina
+> de desenvolvimento) ou **EC2** (dentro da instância, via SSH não interativo).
+> Os comandos da EC2 foram executados um a um no formato
+> `ssh -i chave ubuntu@IP "comando"`.
 
-## Pré-requisitos (já concluídos)
+## Pré-requisitos
 
-1. Instância EC2 com Ubuntu Server 24.04 (verificado: `Ubuntu 24.04.4 LTS`), IP público e SSH funcionando.
+1. Instância EC2 com Ubuntu Server 24.04 (`Ubuntu 24.04.4 LTS`), IP público e SSH funcionando.
 2. Security group liberando as portas 22 (SSH) e 80 (HTTP).
 3. Aplicação Django no GitHub: projeto `config`, app `usuarios`, banco SQLite.
-4. Chave `chave_prototipo.pem` disponível na raiz do projeto local.
+4. Chave `chave_prototipo.pem` na raiz do projeto local.
 
-## Valores reais usados
+## Valores usados
 
-Estão todos no `.env` local (fora do Git). Os marcadores deste documento mapeiam para:
+Todos no `.env` local (fora do Git). Mapeamento dos marcadores:
 
 - Repositório: `guidesiderio/prototipo-multimidia`
 - `IP_PUBLICO`: `98.92.219.104` (muda ao parar/religar a instância).
-- Chave SSH: `chave_prototipo.pem` (na raiz do projeto local).
+- Chave SSH: `chave_prototipo.pem` (raiz do projeto local).
 - `DJANGO_SECRET_KEY`: valor já presente no `.env` local (não impresso aqui).
 - Superusuário: `DJANGO_SUPERUSER_USERNAME` / `_EMAIL` / `_PASSWORD` do `.env`.
 
-> Segurança: a chave secreta e a senha do superusuário ficam só no `.env`
-> (ignorado pelo Git). Não devem ser escritas neste arquivo nem commitadas.
+> Segurança: chave secreta e senha do superusuário ficam só no `.env` (ignorado
+> pelo Git). Não devem ser escritas neste arquivo nem commitadas.
 
 ## Parte A: ajustes de produção no código (LOCAL)
 
-Edições aplicadas em `config/settings.py`:
+Edições em `config/settings.py`.
 
 No topo, abaixo de `from pathlib import Path`:
 
@@ -52,13 +41,13 @@ Logo abaixo da `SECRET_KEY` original (mantida como padrão de desenvolvimento):
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", SECRET_KEY)
 ```
 
-`DEBUG` trocado por:
+`DEBUG`:
 
 ```python
 DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
 ```
 
-`ALLOWED_HOSTS` trocado por:
+`ALLOWED_HOSTS`:
 
 ```python
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
@@ -70,9 +59,8 @@ No fim do arquivo, destino dos estáticos:
 STATIC_ROOT = BASE_DIR / "staticfiles"
 ```
 
-Observação: o `requirements.txt` já continha `gunicorn` (26.0.0), então o
-`pip install gunicorn` do runbook original já estava satisfeito. O `.gitignore`
-recebeu `*.pem` e `staticfiles/`. Em seguida, regenerou-se o lock e subiu-se:
+O `requirements.txt` já continha `gunicorn` (26.0.0). O `.gitignore` recebeu
+`*.pem` e `staticfiles/`. Lock regenerado e código enviado:
 
 ```bash
 # LOCAL
@@ -86,14 +74,14 @@ Validação local: `python manage.py check` retornou `System check identified no
 
 ## Parte B: provisionar e publicar na instância (EC2)
 
-Todos os comandos abaixo rodaram via SSH não interativo, no formato:
+Formato de cada comando:
 
 ```bash
 # LOCAL
 ssh -i "chave_prototipo.pem" -o BatchMode=yes ubuntu@98.92.219.104 "COMANDO"
 ```
 
-A conexão foi validada primeiro com:
+Conexão validada antes:
 
 ```bash
 # LOCAL
@@ -104,15 +92,13 @@ ssh -i "chave_prototipo.pem" -o StrictHostKeyChecking=accept-new -o ConnectTimeo
 ### B.1 Atualizar o sistema e instalar pacotes
 
 ```bash
-# EC2 (não interativo)
+# EC2
 sudo DEBIAN_FRONTEND=noninteractive apt-get update
 sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y python3-venv python3-pip git nginx
 ```
 
 ### B.2 Clonar o repositório e preparar o ambiente
-
-A pasta foi removida antes para garantir um clone limpo, e o `pip` foi atualizado:
 
 ```bash
 # EC2
@@ -126,12 +112,12 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-Repositório público, então o clone não pediu autenticação. Django instalado: 5.2.14.
+Repositório público, clone sem autenticação. Django instalado: 5.2.14.
 
 ### B.3 Migrar, juntar estáticos e criar o superusuário
 
 A chave de desenvolvimento padrão atende a estes comandos de gerenciamento. O
-superusuário foi criado a partir das variáveis do `.env` (não como `admin`):
+superusuário vem das variáveis do `.env`:
 
 ```bash
 # EC2 (com o venv ativo, dentro da pasta do projeto)
@@ -146,7 +132,7 @@ Resultado: 20 migrações aplicadas, 127 arquivos estáticos copiados,
 
 ### B.4 Criar o `.env` de produção na instância
 
-A chave secreta foi **copiada do `.env` local** (não gerada na instância):
+A chave secreta foi copiada do `.env` local:
 
 ```bash
 # EC2 (dentro da pasta do projeto)
@@ -157,6 +143,10 @@ DJANGO_SECRET_KEY=<chave do .env local>
 EOF
 chmod 600 .env
 ```
+
+> O IP público muda ao parar/religar a instância. Ao trocar o IP, edite o `.env`,
+> atualize essa linha e rode `sudo systemctl restart gunicorn`. Alternativa de
+> menor atrito no protótipo: usar `*` no lugar do IP.
 
 ### B.5 Serviço do Gunicorn no systemd
 
@@ -185,17 +175,10 @@ systemctl is-active gunicorn
 curl -s -I http://127.0.0.1:8000/ | head -1
 ```
 
-`enable --now` faz start + enable num passo só. Status: `active`; o `curl`
-retornou `HTTP/1.1 302 Found`.
-
-> Sobre o `DJANGO_ALLOWED_HOSTS`: como o IP público muda ao parar/religar a
-> instância, ao trocar o IP edite o `.env`, atualize essa linha e rode
-> `sudo systemctl restart gunicorn`. Alternativa de menor atrito no protótipo:
-> usar `*` no lugar do IP.
+`enable --now` faz start + enable num passo. Status: `active`; o `curl` retornou
+`HTTP/1.1 302 Found`.
 
 ### B.6 Nginx como proxy reverso (porta 80)
-
-A permissão da home e a pasta `media/` foram ajustadas junto com o Nginx:
 
 ```bash
 # EC2
@@ -231,7 +214,7 @@ sudo systemctl restart nginx
 ```
 
 `server_name _;` responde a qualquer host, então não quebra quando o IP muda.
-`ln -sf` foi usado para ser idempotente. `nginx -t` retornou sintaxe ok.
+`nginx -t` retornou sintaxe ok.
 
 ## Parte C: verificação (resultados obtidos)
 
@@ -245,7 +228,7 @@ sudo systemctl restart nginx
 | Raiz externa | `curl http://98.92.219.104/` (do PC local) | `302` → `/dashboard/` |
 | Login externo | `curl http://98.92.219.104/login/` | `200` |
 
-Estáticos servidos pelo Nginx (CSS = 200), logo o `/admin/` aparece estilizado.
+CSS = 200 confirma estáticos servidos pelo Nginx, logo o `/admin/` aparece estilizado.
 
 Falta apenas o teste manual no navegador (registro, login, edição de perfil com
 upload de imagem e troca de senha) em `http://98.92.219.104`.
