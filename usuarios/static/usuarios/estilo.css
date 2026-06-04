@@ -1,0 +1,52 @@
+/* Estilos do app usuarios.
+   Aplica aparencia de formulario do Bootstrap aos campos gerados
+   automaticamente pelo Django, ja que os widgets nao recebem a classe
+   .form-control sem editar os forms em Python. */
+
+body {
+    background-color: #f5f6f8;
+}
+
+main {
+    max-width: 720px;
+}
+
+/* Campos de formulario: visual equivalente ao .form-control do Bootstrap */
+main form input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
+main form select,
+main form textarea {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.25rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+/* Foco visivel e acessivel */
+main form input:focus,
+main form select:focus,
+main form textarea:focus,
+a:focus,
+button:focus {
+    outline: none;
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+main form label {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+/* Lista de regras de senha do UserCreationForm */
+main form ul {
+    padding-left: 1.1rem;
+    font-size: 0.875rem;
+    color: #6c757d;
+}

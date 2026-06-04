@@ -1,17 +1,45 @@
 {% extends "usuarios/base.html" %}
 {% block titulo %}Dashboard{% endblock %}
 {% block conteudo %}
-    <h1>Dashboard</h1>
-    {% if user.foto_perfil %}
-        <img src="{{ user.foto_perfil.url }}" alt="foto de perfil" width="120">
-    {% endif %}
-    <p>Nome completo: {{ user.nome_completo }}</p>
-    <p>Username: {{ user.username }}</p>
-    <p>Email: {{ user.email }}</p>
-    <p>Descrição: {{ user.descricao }}</p>
-    <p>Membro desde: {{ user.date_joined }}</p>
-    <ul>
-        <li><a href="{% url 'editar_perfil' %}">Editar perfil</a></li>
-        <li><a href="{% url 'alterar_senha' %}">Alterar senha</a></li>
-    </ul>
+    <h1 class="h3 mb-4">Dashboard</h1>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="row g-4 align-items-start">
+                <div class="col-auto">
+                    {% if user.foto_perfil %}
+                        <img src="{{ user.foto_perfil.url }}" alt="Foto de perfil de {{ user.username }}"
+                             class="rounded img-thumbnail" width="120" height="120">
+                    {% else %}
+                        <div class="rounded bg-secondary-subtle d-flex align-items-center justify-content-center"
+                             style="width:120px;height:120px" aria-hidden="true">
+                            <span class="text-secondary">Sem foto</span>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="col">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Nome completo</dt>
+                        <dd class="col-sm-8">{{ user.nome_completo|default:"—" }}</dd>
+
+                        <dt class="col-sm-4">Username</dt>
+                        <dd class="col-sm-8">{{ user.username }}</dd>
+
+                        <dt class="col-sm-4">Email</dt>
+                        <dd class="col-sm-8">{{ user.email|default:"—" }}</dd>
+
+                        <dt class="col-sm-4">Descrição</dt>
+                        <dd class="col-sm-8">{{ user.descricao|default:"—" }}</dd>
+
+                        <dt class="col-sm-4">Membro desde</dt>
+                        <dd class="col-sm-8">{{ user.date_joined }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4 d-flex gap-2">
+        <a href="{% url 'editar_perfil' %}" class="btn btn-primary">Editar perfil</a>
+        <a href="{% url 'alterar_senha' %}" class="btn btn-outline-secondary">Alterar senha</a>
+    </div>
 {% endblock %}
