@@ -1,4 +1,4 @@
-# Fase 4: Deploy da aplicação na EC2 (Ubuntu 24.04)
+# Deploy da aplicação na EC2 (Ubuntu 24.04)
 
 > Runbook do deploy executado. Cada comando indica onde roda: **LOCAL** (máquina
 > de desenvolvimento) ou **EC2** (dentro da instância, via SSH não interativo).
@@ -17,7 +17,7 @@
 Todos no `.env` local (fora do Git). Mapeamento dos marcadores:
 
 - Repositório: `guidesiderio/prototipo-multimidia`
-- `IP_PUBLICO`: `98.92.219.104` (muda ao parar/religar a instância).
+- `IP_PUBLICO`: `SEU_IP_PUBLICO` (muda ao parar/religar a instância).
 - Chave SSH: `chave_prototipo.pem` (raiz do projeto local).
 - `DJANGO_SECRET_KEY`: valor já presente no `.env` local (não impresso aqui).
 - Superusuário: `DJANGO_SUPERUSER_USERNAME` / `_EMAIL` / `_PASSWORD` do `.env`.
@@ -78,7 +78,7 @@ Formato de cada comando:
 
 ```bash
 # LOCAL
-ssh -i "chave_prototipo.pem" -o BatchMode=yes ubuntu@98.92.219.104 "COMANDO"
+ssh -i "chave_prototipo.pem" -o BatchMode=yes ubuntu@SEU_IP_PUBLICO "COMANDO"
 ```
 
 Conexão validada antes:
@@ -86,7 +86,7 @@ Conexão validada antes:
 ```bash
 # LOCAL
 ssh -i "chave_prototipo.pem" -o StrictHostKeyChecking=accept-new -o ConnectTimeout=15 \
-    -o BatchMode=yes ubuntu@98.92.219.104 "echo CONECTADO; whoami; lsb_release -d"
+    -o BatchMode=yes ubuntu@SEU_IP_PUBLICO "echo CONECTADO; whoami; lsb_release -d"
 ```
 
 ### B.1 Atualizar o sistema e instalar pacotes
@@ -124,7 +124,7 @@ superusuário vem das variáveis do `.env`:
 python manage.py migrate --noinput
 python manage.py collectstatic --noinput
 DJANGO_SUPERUSER_PASSWORD='<senha do .env>' python manage.py createsuperuser --noinput \
-    --username guilhermedesiderio --email guilhermedesiderio23@gmail.com
+    --username DEFINA_UM_USUARIO --email seu@email.com
 ```
 
 Resultado: 20 migrações aplicadas, 127 arquivos estáticos copiados,
@@ -138,15 +138,18 @@ A chave secreta foi copiada do `.env` local:
 # EC2 (dentro da pasta do projeto)
 cat > .env <<EOF
 DJANGO_DEBUG=False
-DJANGO_ALLOWED_HOSTS=98.92.219.104,127.0.0.1
+DJANGO_ALLOWED_HOSTS=SEU_IP_PUBLICO,127.0.0.1
 DJANGO_SECRET_KEY=<chave do .env local>
 EOF
 chmod 600 .env
 ```
 
 > O IP público muda ao parar/religar a instância. Ao trocar o IP, edite o `.env`,
-> atualize essa linha e rode `sudo systemctl restart gunicorn`. Alternativa de
-> menor atrito no protótipo: usar `*` no lugar do IP.
+> atualize essa linha e rode `sudo systemctl restart gunicorn`.
+>
+> **Decisão do protótipo:** enquanto a aplicação for protótipo, o `.env` da EC2 usa
+> `DJANGO_ALLOWED_HOSTS=*` para evitar reconfigurar a cada troca de IP. É permissivo
+> (aceita qualquer header `Host`); ao ter domínio ou IP fixo, trocar por lista explícita.
 
 ### B.5 Serviço do Gunicorn no systemd
 
@@ -218,20 +221,17 @@ sudo systemctl restart nginx
 
 ## Parte C: verificação (resultados obtidos)
 
-| Verificação | Comando | Resultado |
-|---|---|---|
-| Gunicorn ativo | `systemctl is-active gunicorn` | `active` |
-| Sintaxe do Nginx | `sudo nginx -t` | syntax is ok |
-| Porta 80 interna | `curl -I http://127.0.0.1/` (na EC2) | `302` |
-| Admin | `curl http://127.0.0.1/admin/login/` (na EC2) | `200` |
-| CSS estático | `curl http://127.0.0.1/static/admin/css/base.css` | `200` |
-| Raiz externa | `curl http://98.92.219.104/` (do PC local) | `302` → `/dashboard/` |
-| Login externo | `curl http://98.92.219.104/login/` | `200` |
+| Verificação      | Comando                                           | Resultado             |
+| ---------------- | ------------------------------------------------- | --------------------- |
+| Gunicorn ativo   | `systemctl is-active gunicorn`                    | `active`              |
+| Sintaxe do Nginx | `sudo nginx -t`                                   | syntax is ok          |
+| Porta 80 interna | `curl -I http://127.0.0.1/` (na EC2)              | `302`                 |
+| Admin            | `curl http://127.0.0.1/admin/login/` (na EC2)     | `200`                 |
+| CSS estático     | `curl http://127.0.0.1/static/admin/css/base.css` | `200`                 |
+| Raiz externa     | `curl http://SEU_IP_PUBLICO/` (do PC local)       | `302` → `/dashboard/` |
+| Login externo    | `curl http://SEU_IP_PUBLICO/login/`               | `200`                 |
 
 CSS = 200 confirma estáticos servidos pelo Nginx, logo o `/admin/` aparece estilizado.
-
-Falta apenas o teste manual no navegador (registro, login, edição de perfil com
-upload de imagem e troca de senha) em `http://98.92.219.104`.
 
 ## Operação e custo
 
@@ -244,9 +244,3 @@ upload de imagem e troca de senha) em `http://98.92.219.104`.
 - `400 Bad Request`: o host de acesso não está em `DJANGO_ALLOWED_HOSTS`. Atualize a linha no `.env` e reinicie o Gunicorn.
 - `502 Bad Gateway`: o Gunicorn não está respondendo. Veja `sudo systemctl status gunicorn` e `sudo journalctl -u gunicorn -n 50`.
 - Admin sem estilo (CSS): `collectstatic` não rodou ou o Nginx não consegue ler a pasta. Rode `collectstatic`, confirme `sudo chmod 755 /home/ubuntu` e reinicie o Nginx.
-
-## Fora de escopo desta fase
-
-- HTTPS, certificado e domínio próprio.
-- RDS, S3 e upload de multimídia.
-- Auto scaling, balanceamento de carga e múltiplas instâncias.

@@ -16,8 +16,8 @@ publicada na AWS**. Esta entrega cobre:
 O upload de multimídia, o banco gerenciado (RDS) e o armazenamento de objetos
 (S3) entram nos protótipos seguintes.
 
-Aplicação publicada (protótipo, pode estar fora do ar para economizar free tier):
-`http://98.92.219.104`. O IP muda quando a instância é parada e religada.
+Aplicação publicada (protótipo, pode estar fora do ar para economizar free tier).
+O IP muda quando a instância é parada e religada.
 
 ## Funcionalidades desta entrega
 
@@ -67,11 +67,11 @@ Navegador  ->  Nginx (porta 80)  ->  Gunicorn (127.0.0.1:8000)  ->  Django  ->  
 `config/settings.py` lê variáveis de ambiente, com padrões seguros para
 desenvolvimento. Em produção elas vêm de um arquivo `.env` (fora do Git).
 
-| Variável               | Padrão (dev)          | Função                                              |
-| ---------------------- | --------------------- | --------------------------------------------------- |
-| `DJANGO_SECRET_KEY`    | chave insegura de dev | Chave secreta do Django                             |
-| `DJANGO_DEBUG`         | `True`                | Liga/desliga o modo debug (`False` em produção)     |
-| `DJANGO_ALLOWED_HOSTS` | `127.0.0.1,localhost` | Hosts permitidos, separados por vírgula             |
+| Variável               | Padrão (dev)          | Função                                          |
+| ---------------------- | --------------------- | ----------------------------------------------- |
+| `DJANGO_SECRET_KEY`    | chave insegura de dev | Chave secreta do Django                         |
+| `DJANGO_DEBUG`         | `True`                | Liga/desliga o modo debug (`False` em produção) |
+| `DJANGO_ALLOWED_HOSTS` | `127.0.0.1,localhost` | Hosts permitidos, separados por vírgula         |
 
 O arquivo `.env.example` na raiz documenta todas as variáveis (inclusive os
 parâmetros de deploy e de criação do superusuário). Copie-o para `.env` e
@@ -182,16 +182,6 @@ sudo systemctl restart gunicorn
 O modelo de usuário é customizado (`usuarios.Usuario`, estendendo
 `AbstractUser`), apontado por `AUTH_USER_MODEL` em `settings.py`. A autenticação
 usa as views nativas do Django (`LoginView`, `LogoutView`, `PasswordChangeView`).
-
-## Equipe
-
-| Nome                         | Matrícula   | Colaboração |
-| ---------------------------- | ----------- | ----------- |
-| Guilherme Oliveira Desidério | 20219036892 |             |
-|                              |             |             |
-|                              |             |             |
-|                              |             |             |
-|                              |             |             |
 
 ## Próximos passos
 
