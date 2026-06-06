@@ -188,6 +188,5 @@ usa as views nativas do Django (`LoginView`, `LogoutView`, `PasswordChangeView`)
 - Upload e gerenciamento de arquivos multimídia (imagens, áudios e vídeos).
 - Armazenamento de objetos no S3.
 - Banco gerenciado (RDS/PostgreSQL) no lugar do SQLite.
-- Infraestrutura AWS completa: VPC, grupos de segurança, tabela de rotas.
 - HTTPS com certificado e domínio próprio.
 - Monitoramento, balanceamento de carga e auto scaling.
