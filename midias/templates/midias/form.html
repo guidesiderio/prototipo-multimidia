@@ -1,0 +1,11 @@
+{% extends "usuarios/base.html" %}
+{% block titulo %}{{ titulo_pagina }}{% endblock %}
+{% block conteudo %}
+<h1 class="h3 mb-3">{{ titulo_pagina }}</h1>
+<form method="post" enctype="multipart/form-data" class="col-md-8">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Salvar</button>
+    <a href="{% url 'midias:lista' %}" class="btn btn-link">Cancelar</a>
+</form>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "usuarios/base.html" %}
+{% block titulo %}Excluir mídia{% endblock %}
+{% block conteudo %}
+<h1 class="h3 mb-3">Excluir mídia</h1>
+<p>Tem certeza que deseja excluir <strong>{{ midia.titulo }}</strong>? Esta ação não pode ser desfeita.</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Excluir</button>
+    <a href="{% url 'midias:detalhe' midia.pk %}" class="btn btn-link">Cancelar</a>
+</form>
+{% endblock %}

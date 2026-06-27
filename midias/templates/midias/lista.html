@@ -1,0 +1,47 @@
+{% extends "usuarios/base.html" %}
+{% block titulo %}Minhas mídias{% endblock %}
+{% block conteudo %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 m-0">Minhas mídias</h1>
+    <a href="{% url 'midias:criar' %}" class="btn btn-primary">Nova mídia</a>
+</div>
+
+<form method="get" class="row g-2 mb-4">
+    <div class="col-sm-6">
+        <input type="text" name="q" value="{{ q }}" class="form-control"
+               placeholder="Buscar por título ou descrição">
+    </div>
+    <div class="col-sm-3">
+        <select name="tipo" class="form-select">
+            <option value="">Todos os tipos</option>
+            {% for valor, rotulo in tipos %}
+                <option value="{{ valor }}" {% if valor == tipo %}selected{% endif %}>{{ rotulo }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-sm-3">
+        <button type="submit" class="btn btn-outline-secondary w-100">Buscar</button>
+    </div>
+</form>
+
+{% if midias %}
+    <div class="row row-cols-1 row-cols-md-3 g-3">
+        {% for midia in midias %}
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h2 class="h5 card-title">{{ midia.titulo }}</h2>
+                        <span class="badge bg-secondary">{{ midia.get_tipo_display }}</span>
+                        <p class="card-text mt-2 text-truncate">{{ midia.descricao }}</p>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a href="{% url 'midias:detalhe' midia.pk %}" class="btn btn-sm btn-primary">Abrir</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p class="text-muted">Nenhuma mídia encontrada.</p>
+{% endif %}
+{% endblock %}

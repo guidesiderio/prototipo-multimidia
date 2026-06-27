@@ -7,6 +7,7 @@ from django.views.generic import RedirectView
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("usuarios.urls")),
+    path("", include("midias.urls")),
     # a raiz redireciona para o dashboard (que exige login)
     path("", RedirectView.as_view(pattern_name="dashboard")),
 ]
