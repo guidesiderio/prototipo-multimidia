@@ -1,10 +1,15 @@
 asgiref==3.11.1
+boto3==1.43.36
+botocore==1.43.36
 Django==5.2.14
+django-storages==1.14.6
 gunicorn==26.0.0
+jmespath==1.1.0
 packaging==26.2
 pillow==12.2.0
 psycopg==3.3.4
 psycopg-binary==3.3.4
+s3transfer==0.19.0
 sqlparse==0.5.5
 typing_extensions==4.15.0
 tzdata==2026.2

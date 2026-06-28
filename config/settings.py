@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'usuarios',
     'midias',
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -135,4 +136,30 @@ LOGIN_REDIRECT_URL = "dashboard"
 LOGOUT_REDIRECT_URL = "login"
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Armazenamento de binarios no S3 (ligado por variavel de ambiente).
+# Local: USE_S3 ausente ou diferente de "True", usa disco (padrao do Django).
+# Producao (EC2): USE_S3=True, usa o bucket S3 via IAM role anexada a instancia.
+USE_S3 = os.environ.get("USE_S3", "False") == "True"
+
+if USE_S3:
+    AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
+    AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "us-east-1")
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3.S3Storage",
+            "OPTIONS": {
+                "bucket_name": AWS_STORAGE_BUCKET_NAME,
+                "region_name": AWS_S3_REGION_NAME,
+                "querystring_auth": True,      # gera URLs assinadas
+                "querystring_expire": 3600,    # validade da URL em segundos (1 hora)
+                "default_acl": None,           # bucket com ACLs desabilitadas
+                "file_overwrite": False,       # nao sobrescreve arquivo de mesmo nome
+                "signature_version": "s3v4",
+            },
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
 
