@@ -1,0 +1,15 @@
+# Banco de desenvolvimento. Nao containeriza a aplicacao.
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: prototipo_db
+      POSTGRES_USER: prototipo
+      POSTGRES_PASSWORD: prototipo
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata_prototipo:/var/lib/postgresql/data
+
+volumes:
+  pgdata_prototipo:
