@@ -61,7 +61,7 @@ Resultado esperado:
 
 | Subnet           | AZ         |
 | ---------------- | ---------- |
-| subnet_publica_a | us-east-1a |
+| subnet_publica | us-east-1a |
 | subnet_publica_b | us-east-1b |
 
 ---
@@ -85,7 +85,7 @@ Ela deve possuir:
 
 Na aba **Subnet Associations**, associe:
 
-* subnet_publica_a
+* subnet_publica
 * subnet_publica_b
 
 ---
@@ -294,7 +294,7 @@ IPv4
 
 Selecione:
 
-* subnet_publica_a
+* subnet_publica
 * subnet_publica_b
 
 ## Security Group
@@ -347,7 +347,7 @@ prototipo_vpc
 
 Selecione:
 
-* subnet_publica_a
+* subnet_publica
 * subnet_publica_b
 
 ## Load Balancer
@@ -372,7 +372,7 @@ tg-prototipo
 | ---------------- | ----- |
 | Desired Capacity | 2     |
 | Minimum Capacity | 2     |
-| Maximum Capacity | 4     |
+| Maximum Capacity | 6     |
 
 Resultado:
 
